@@ -75,6 +75,53 @@ systemctl restart mariadb
 ![image](https://user-images.githubusercontent.com/96833570/211056980-a86fa573-83c9-4d77-8b82-1c8b57cc944f.png)
 
 
+## Memcached setup
+
+Install, start & enable memcache on port 11211
+
+```
+vagrant ssh mc01
+sudo -i
+yum update -y
+yum install epel-release -y
+yum install memcached -y
+systemctl start memcached 
+systemctl enable memcached
+systemctl status memcached
+memcached -p 11211 -U 11111 -u memcached -d
+```
+
+![image](https://user-images.githubusercontent.com/96833570/211066706-59508adc-54ed-42f2-9912-e7c60e65a59e.png)
+
+
+
+## RabbitMQ setup
+
+```
+vagrant ssh rmq01
+cat /etc/hosts
+sudo -i
+yum update -y
+yum install epel-release -y
+yum install socat -y
+yum install erlang -y
+yum install wget -y
+cd /tmp/ 
+wget http://packages.erlang-solutions.com/erlang-solutions-2.0-1.noarch.rpm
+
+rpm -Uvh erlang-solutions-2.0-1.noarch.rpm
+
+# Install rabbitmq
+curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+yum install rabbitmq-server -y
+
+
+# Start rabbitmq
+systemctl start rabbitmq-server
+systemctl enable rabbitmq-server
+systemctl status rabbitmq-server
+```
+
 # Debug
 
 `ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)`
