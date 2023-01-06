@@ -24,3 +24,27 @@ ping rmq01
 ping db01
 logout
 ```
+
+
+## DB setup
+
+```
+vagrant ssh db01
+sudo -i
+yum update -y
+echo "DB_PSW='psw123'" >> /etc/profile
+source /etc/profile
+yum install epel-release -y
+yum install git mariadb-server -y
+sleep 10
+systemctl start mariadb
+systemctl enable mariadb
+mysql_secure_installation
+# Set the variable password here
+mysql -u root -ppsw123
+# or mysql -u root -p 
+
+
+
+
+```
