@@ -125,6 +125,9 @@ sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.confi
 rabbitmqctl add_user rabbit psw123
 rabbitmqctl set_user_tags rabbit administrator
 
+
+systemctl restart rabbitmq-server
+
 ```
 
 # Debug
