@@ -44,7 +44,7 @@ mysql_secure_installation
 mysql -u root -ppsw123
 # or mysql -u root -p
 
-
+mysql --version
 
 git clone -b local-setup https://github.com/devopshydclub/vprofile-project.git
 cd vprofile-project
@@ -82,7 +82,7 @@ Install, start & enable memcache on port 11211
 ```
 vagrant ssh mc01
 sudo -i
-yum update -y
+yum update -y 
 yum install epel-release -y
 yum install memcached -y
 systemctl start memcached 
@@ -106,13 +106,13 @@ yum install epel-release -y
 yum install wget -y
 cd /tmp/
 wget http://packages.erlang-solutions.com/erlang-solutions-2.0-1.noarch.rpm
-rpm -Uvh erlang-solutions-2.0-1.noarch.rpm
-yum -y install erlang socat
+sudo rpm -Uvh erlang-solutions-2.0-1.noarch.rpm
+sudo yum -y install erlang socat
 
 # Install rabbitmq
 
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
-yum install rabbitmq-server -y
+sudo yum install rabbitmq-server -y
 
 
 # Start rabbitmq
@@ -135,3 +135,32 @@ systemctl restart rabbitmq-server
 `ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)`
 
 Solution: Add your password adjacent to the -p flag like: `-pmyuniquepass -p123456
+
+
+# APP SETUP
+
+## Tomcat Server Setup
+
+```
+vagrant ssh app01
+cat /etc/hosts
+sudo -i
+yum update -y
+yum install epel-release -y
+
+yum install java-1.8.0-openjdk -y
+yum install git maven wget -y
+
+cd /tmp/
+wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz
+tar xzvf apache-tomcat-8.5.37.tar.gz
+
+ useradd --home-dir /usr/local/tomcat8 --shell /sbin/nologin tomcat
+ 
+cp -r /tmp/apache-tomcat-8.5.37/* /usr/local/tomcat8/
+chown -R tomcat.tomcat /usr/local/tomcat8
+
+nano  /etc/systemd/system/tomcat.service
+
+
+```
