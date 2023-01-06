@@ -145,11 +145,7 @@ Solution: Add your password adjacent to the -p flag like: `-pmyuniquepass -p1234
 vagrant ssh app01
 cat /etc/hosts
 sudo -i
-yum update -y
-yum install epel-release -y
-
-yum install java-1.8.0-openjdk -y
-yum install git maven wget -y
+yum update -y && yum install epel-release -y && yum install java-1.8.0-openjdk -y && yum install git maven wget -y
 
 cd /tmp/
 wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz
@@ -157,10 +153,106 @@ tar xzvf apache-tomcat-8.5.37.tar.gz
 
  useradd --home-dir /usr/local/tomcat8 --shell /sbin/nologin tomcat
  
-cp -r /tmp/apache-tomcat-8.5.37/* /usr/local/tomcat8/
-chown -R tomcat.tomcat /usr/local/tomcat8
+cp -r /tmp/apache-tomcat-8.5.37/* /usr/local/tomcat8/ && chown -R tomcat.tomcat /usr/local/tomcat8
 
 nano  /etc/systemd/system/tomcat.service
 
 
+
+[Unit]
+Description=Tomcat
+After=network.target
+[Service]
+User=tomcat
+WorkingDirectory=/usr/local/tomcat8
+Environment=JRE_HOME=/usr/lib/jvm/jre
+Environment=JAVA_HOME=/usr/lib/jvm/jre
+Environment=CATALINA_HOME=/usr/local/tomcat8
+Environment=CATALINE_BASE=/usr/local/tomcat8
+ExecStart=/usr/local/tomcat8/bin/catalina.sh run
+ExecStop=/usr/local/tomcat8/bin/shutdown.sh
+SyslogIdentifier=tomcat-%i
+[Install]
+WantedBy=multi-user.target
+
+
+
+systemctl daemon-reload
+systemctl start tomcat
+systemctl enable tomcat
+
 ```
+![image](https://user-images.githubusercontent.com/96833570/211103524-acd4298e-59af-4f24-9bad-fd686f9b3995.png)
+
+
+
+# Build and Deploy the app
+
+On Tomcat server(app01):
+
+```
+cd /tmp/
+git clone -b local-setup https://github.com/devopshydclub/vprofile-project.git
+
+cd vprofile-project
+
+# Update file with backend server details
+src/main/resources/application.properties
+
+
+
+# build the artifact
+mvn install
+
+# Deploy artifact
+systemctl stop tomcat
+sleep 120
+rm -rf /usr/local/tomcat8/webapps/ROOT*
+cp target/vprofile-v2.war /usr/local/tomcat8/webapps/ROOT.war
+systemctl start tomcat
+sleep 300
+chown tomcat.tomcat /usr/local/tomcat8/webapps -R
+systemctl restart tomcat
+
+
+```
+
+
+# Setup nginx
+
+```
+vagrant ssh web01
+sudo -i
+apt update -y && apt upgrade -y
+apt install nginx -y
+nano etc/nginx/sites-available/vproapp
+
+
+upstream vproapp {
+server app01:8080;
+}
+server {
+listen 80;
+location / {
+proxy_pass http://vproapp;
+}
+}
+
+
+rm -rf /etc/nginx/sites-enabled/default &&
+ln -s /etc/nginx/sites-available/vproapp /etc/nginx/sites-enabled/vproapp &&
+systemctl restart nginx
+
+```
+
+
+
+![image](https://user-images.githubusercontent.com/96833570/211104213-d0438711-e593-44e4-8a75-4a1a6bca26bb.png)
+
+![image](https://user-images.githubusercontent.com/96833570/211104951-b5721b70-0c32-40d0-bd68-a9ea99a8fa9e.png)
+
+
+![image](https://user-images.githubusercontent.com/96833570/211104903-1ac63d41-2a8c-48c0-8bce-67721ba0a92e.png)
+
+
+![image](https://user-images.githubusercontent.com/96833570/211108308-f3d76c04-d290-471b-aa34-9ef7ea57d666.png)
