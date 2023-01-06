@@ -24,9 +24,9 @@ ping rmq01
 ping db01
 logout
 ```
+# BACKEND SETUP
 
-
-## DB setup
+## 1- DB setup
 
 ```
 vagrant ssh db01
@@ -75,7 +75,7 @@ systemctl restart mariadb
 ![image](https://user-images.githubusercontent.com/96833570/211056980-a86fa573-83c9-4d77-8b82-1c8b57cc944f.png)
 
 
-## Memcached setup
+## 2- Memcached setup
 
 Install, start & enable memcache on port 11211
 
@@ -95,7 +95,7 @@ memcached -p 11211 -U 11111 -u memcached -d
 
 
 
-## RabbitMQ setup
+## 3- RabbitMQ setup
 
 ```
 vagrant ssh rmq01
@@ -103,15 +103,14 @@ cat /etc/hosts
 sudo -i
 yum update -y
 yum install epel-release -y
-yum install socat -y
-yum install erlang -y
 yum install wget -y
-cd /tmp/ 
+cd /tmp/
 wget http://packages.erlang-solutions.com/erlang-solutions-2.0-1.noarch.rpm
-
 rpm -Uvh erlang-solutions-2.0-1.noarch.rpm
+yum -y install erlang socat
 
 # Install rabbitmq
+
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
 yum install rabbitmq-server -y
 
@@ -120,6 +119,12 @@ yum install rabbitmq-server -y
 systemctl start rabbitmq-server
 systemctl enable rabbitmq-server
 systemctl status rabbitmq-server
+
+Config Change
+sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
+rabbitmqctl add_user rabbit psw123
+rabbitmqctl set_user_tags rabbit administrator
+
 ```
 
 # Debug
