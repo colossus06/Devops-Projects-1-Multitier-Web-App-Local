@@ -42,9 +42,41 @@ systemctl enable mariadb
 mysql_secure_installation
 # Set the variable password here
 mysql -u root -ppsw123
-# or mysql -u root -p 
+# or mysql -u root -p
+
+
+
+git clone -b local-setup https://github.com/devopshydclub/vprofile-project.git
+cd vprofile-project
+mysql -u root -p"$DB_PSW" -e "create database accounts"
+mysql -u root -p"$DB_PSW" -e "grant all privileges on accounts.* TO 'admin'@'app01' identified by 'psw123' "
+
+
+
+
+mysql -u root -ppsw123 accounts < src/main/resources/db_backup.sql
+mysql -u root -ppsw123 -e "FLUSH PRIVILEGES"
+mysql -u root -p"$DB_PSW"
+show databases;
+use accounts;
+show tables;
+
+
+
+systemctl restart mariadb
 
 
 
 
 ```
+
+![image](https://user-images.githubusercontent.com/96833570/211056824-cb151598-3fcf-4e2a-a9d5-b5abc98b5b74.png)
+
+![image](https://user-images.githubusercontent.com/96833570/211056980-a86fa573-83c9-4d77-8b82-1c8b57cc944f.png)
+
+
+# Debug
+
+`ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)`
+
+Solution: Add your password adjacent to the -p flag like: `-pmyuniquepass -p123456
